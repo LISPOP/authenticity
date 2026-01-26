@@ -207,3 +207,60 @@ ct_flex <- flextable(ct)
 ct_flex
 
 
+
+
+----------------------------------------
+
+  # First install packages
+  install.packages("dplyr")
+install.packages("labelled")
+install.packages("crosstable")
+install.packages("flextable")
+
+# Then load them
+library(dplyr)
+library(labelled)
+library(crosstable)
+library(flextable)
+
+# Then run the rest
+ces <- ces25b %>%
+  select(kiss_module_lispop_2, cps25_genderid) %>%
+  mutate(
+    lispop_3cat = case_when(
+      kiss_module_lispop_2 %in% c(1, 2) ~ "Agree",
+      kiss_module_lispop_2 %in% c(3, 6) ~ "Neutral",
+      TRUE ~ NA_character_
+    ),
+    lispop_3cat = factor(lispop_3cat, levels = c("Agree", "Neutral")),
+    
+    gender_2cat = case_when(
+      cps25_genderid == 1 ~ "Male",
+      cps25_genderid == 2 ~ "Female",
+      TRUE ~ NA_character_
+    ),
+    gender_2cat = factor(gender_2cat, levels = c("Male", "Female"))
+  )
+
+ct <- crosstable(
+  ces,
+  cols = lispop_3cat,
+  by = gender_2cat,
+  total = "both",
+  percent_pattern = "{n} ({p_row}%)",
+  percent_digits = 1
+)
+
+print(ct)
+  
+  
+ct %>% as_flextable(keep_id = TRUE)
+  
+
+
+-------------------------
+  
+  
+  
+  
+
