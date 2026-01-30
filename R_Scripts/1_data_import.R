@@ -1,5 +1,11 @@
-# install packages if necessary
-devtools::install_github("sjikss/cesdata2")
+#install devtools
+install.packages('devtools')
+#install cesdata2
+devtools::install_github("sjkiss/cesdata2")
+#Check that it worked
+library(cesdata2)
+data("ces25b")
+
 
 # load libraries
 library(cesdata2)
