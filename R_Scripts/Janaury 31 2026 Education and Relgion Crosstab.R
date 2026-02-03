@@ -4,60 +4,7 @@ library(labelled)
 library(crosstable)
 library(flextable)
 library(tidyr)
-# Create recoded variables with exact coding from codebook
-ces <- ces25b %>%
-  select(kiss_module_lispop_2, cps25_genderid, cps25_education, cps25_rel_imp) %>%
-  mutate(
-    # Recode gender into 2 categories (Male/Female only)
-    gender_2cat = case_when(
-      cps25_genderid == 1 ~ "Male",
-      cps25_genderid == 2 ~ "Female",
-      cps25_genderid %in% c(3, 4) ~ NA_character_,
-      TRUE ~ NA_character_
-    ),
-    gender_2cat = factor(gender_2cat, levels = c("Male", "Female")),
-    
-    # Recode lispop variable
-    lispop_3cat = case_when(
-      kiss_module_lispop_2 %in% c(4, 5) ~ "Agree",
-      kiss_module_lispop_2 == 3 ~ "Neutral",
-      kiss_module_lispop_2 %in% c(1, 2) ~ "Disagree",
-      kiss_module_lispop_2 == 6 ~ "DK/Refused",
-      TRUE ~ NA_character_
-    ),
-    lispop_3cat = factor(lispop_3cat, 
-                         levels = c("Disagree", "Neutral", "Agree", "DK/Refused")),
-    
-    # Create simplified education categories
-    education_3cat = case_when(
-      cps25_education %in% 1:5 ~ "High school or less",
-      cps25_education %in% 6:7 ~ "Some post-secondary",
-      cps25_education %in% 8:11 ~ "University degree",
-      cps25_education == 12 ~ "DK/Refused",
-      TRUE ~ NA_character_
-    ),
-    education_3cat = factor(education_3cat,
-                            levels = c("High school or less", 
-                                       "Some post-secondary", 
-                                       "University degree",
-                                       "DK/Refused")),
-    
-    # Recode religiosity (cps25_rel_imp from codebook)
-    # 1 = Very important, 2 = Somewhat important, 3 = Not very important,
-    # 4 = Not important at all, 5 = Don't know/Prefer not to answer
-    religiosity = case_when(
-      cps25_rel_imp == 1 ~ "Very important",
-      cps25_rel_imp == 2 ~ "Somewhat important",
-      cps25_rel_imp == 3 ~ "Not very important",
-      cps25_rel_imp == 4 ~ "Not important at all",
-      cps25_rel_imp == 5 ~ "DK/Refused",
-      TRUE ~ NA_character_
-    ),
-    religiosity = factor(religiosity,
-                         levels = c("Very important", "Somewhat important",
-                                    "Not very important", "Not important at all",
-                                    "DK/Refused"))
-  )
+
 
 # OPTION 1: Comprehensive stacked table with all IVs
 # Create gender table
