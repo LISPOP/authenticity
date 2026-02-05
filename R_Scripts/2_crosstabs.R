@@ -34,8 +34,21 @@ ct_religiosity <- crosstable(
 ) %>%
   mutate(Variable = "Religiosity", .before = 1)
 ct_religiosity
-# Combine all three tables
-ct_all_ivs <- bind_rows(ct_gender, ct_education, ct_religiosity)
+
+# Create age table
+ct_age <- crosstable(
+  ces,
+  by = lispop_3cat,
+  cols = age_5cat,
+  total = "both",
+  percent_pattern = "{p_row}% (n={n})",
+  percent_digits = 1
+) %>%
+  mutate(Variable = "Age", .before = 1)
+ct_age
+
+# Combine all four tables
+ct_all_ivs <- bind_rows(ct_gender, ct_education, ct_religiosity, ct_age)
 
 # Create flextable
 ft_all <- ct_all_ivs %>%
@@ -45,9 +58,15 @@ ft_all <- ct_all_ivs %>%
     gender_2cat = "Gender",
     education_3cat = "Education",
     religiosity = "Religiosity",
+    age_5cat = "Age",
     .variable = "Lispop Response",
     total = "Total"
   ) %>%
   autofit()
 
 ft_all
+
+
+
+
+ 

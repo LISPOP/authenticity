@@ -13,6 +13,7 @@ library(haven)
 library(here)
 library(labelled)
 library(flextable)
+library(crosstable)  # Add this line
 #load the dataset called ces25b
 data("ces25b")
 
@@ -32,7 +33,7 @@ ces25b %>%
 #### Select variables ####
 # add any variables we deal with in here. 
 ces25b %>%
-  select(contains("kiss")&-contains("DO"), cps25_genderid, cps25_education, cps25_rel_imp)->ces 
+  select(contains("kiss")&-contains("DO"), cps25_genderid, cps25_education, cps25_rel_imp, cps25_age_in_years)->ces 
 
 # Now we can use just the dataset ces
 #### Recodes ####
@@ -106,4 +107,20 @@ ces %>%
                                     "Not very important", "Not important at all",
                                     "DK/Refused")))->ces
 
+
+#Age 
+
+ces %>% 
+  mutate(
+    age_5cat = case_when(
+      cps25_age_in_years >= 18 & cps25_age_in_years <= 34 ~ "18-34",
+      cps25_age_in_years >= 35 & cps25_age_in_years <= 44 ~ "35-44",
+      cps25_age_in_years >= 45 & cps25_age_in_years <= 54 ~ "45-54",
+      cps25_age_in_years >= 55 & cps25_age_in_years <= 64 ~ "55-64",
+      cps25_age_in_years >= 65 ~ "65+",
+      TRUE ~ NA_character_
+    ),
+    age_5cat = factor(age_5cat,
+                      levels = c("18-34","35-44","45-54","55-64","65+"))
+  ) -> ces
 
