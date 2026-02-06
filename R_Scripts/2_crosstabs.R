@@ -4,7 +4,7 @@ source("R_Scripts/1_data_import.R")
 # Create gender table
 ct_gender <- crosstable(
   ces,
-  by = lispop_3cat,
+  by = truth,
   cols = gender_2cat,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",
@@ -15,7 +15,7 @@ ct_gender
 # Create education table
 ct_education <- crosstable(
   ces,
-  by = lispop_3cat,
+  by = truth,
  cols = education_3cat,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",
@@ -26,7 +26,7 @@ ct_education
 # Create religiosity table
 ct_religiosity <- crosstable(
   ces,
-  by = lispop_3cat,
+  by = truth,
   cols = religiosity,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",
@@ -38,7 +38,7 @@ ct_religiosity
 # Create age table
 ct_age <- crosstable(
   ces,
-  by = lispop_3cat,
+  by = truth,
   cols = age_5cat,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",

@@ -59,14 +59,14 @@ ces %>%
 ces %>% 
   mutate(
     # Recode lispop variable
-    lispop_3cat = case_when(
+    truth = case_when(
       kiss_module_lispop_2 %in% c(4, 5) ~ "Agree",
       kiss_module_lispop_2 == 3 ~ "Neutral",
       kiss_module_lispop_2 %in% c(1, 2) ~ "Disagree",
       kiss_module_lispop_2 == 6 ~ "DK/Refused",
       TRUE ~ NA_character_
     ),
-    lispop_3cat = factor(lispop_3cat, 
+    truth = factor(truth, 
                          levels = c("Disagree", "Neutral", "Agree", "DK/Refused")))->ces
     
 # Education
