@@ -124,3 +124,17 @@ ces %>%
                       levels = c("18-34","35-44","45-54","55-64","65+"))
   ) -> ces
 
+
+#ideology
+
+ces <- ces %>% 
+  mutate(
+    ideology_group = case_when(
+      cps25_lr_scale_bef_1 %in% 0:3 ~ "Left",
+      cps25_lr_scale_bef_1 %in% 4:6 ~ "Centre",
+      cps25_lr_scale_bef_1 %in% 7:10 ~ "Right",
+      TRUE ~ NA_character_
+    ),
+    ideology_group = factor(ideology_group,
+                            levels = c("Left", "Centre", "Right"))
+  )
