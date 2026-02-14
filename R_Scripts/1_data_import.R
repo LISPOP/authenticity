@@ -33,7 +33,7 @@ ces25b %>%
 #### Select variables ####
 # add any variables we deal with in here. 
 ces25b %>%
-  select(contains("kiss")&-contains("DO"), cps25_genderid, cps25_education, cps25_rel_imp, cps25_age_in_years)->ces 
+  select(contains("kiss")&-contains("DO"), cps25_genderid, cps25_education, cps25_rel_imp, cps25_age_in_years, cps25_lr_scale_bef_1)->ces 
 
 # Now we can use just the dataset ces
 #### Recodes ####
