@@ -34,7 +34,7 @@ summary(model2)
 exp(coef(model1))
 exp(coef(model2))
 
----------------
+
   
 #graph
 library(ggplot2)
@@ -45,8 +45,6 @@ ggplot(analysis_data,
   facet_wrap(~ education_3cat) +
   theme_minimal()
 
----------------
-  
 #ideology
   
 # clean data
@@ -99,9 +97,8 @@ ggplot(analysis_data,
 
 
 
--------------
 # model 3
-  model3 <- glm(truth_binary ~ age_5cat * ideology_group,
+model3 <- glm(truth_binary ~ age_5cat * ideology_group,
                 data = analysis_data,
                 family = binomial)
 summary(model3)
@@ -110,7 +107,7 @@ summary(model3)
 exp(coef(model2))
 exp(coef(model3))
 
-install.packages("ggeffects")
+#install.packages("ggeffects")
 library(ggeffects)
 library(ggplot2)
 
@@ -128,7 +125,7 @@ ggplot(pred, aes(x = x, y = predicted, color = group)) +
   theme_minimal()
 
 
------------
+
   
   # gender
   
