@@ -33,7 +33,8 @@ ces25b %>%
 #### Select variables ####
 # add any variables we deal with in here. 
 ces25b %>%
-  select(contains("kiss")&-contains("DO"), cps25_genderid, cps25_education, cps25_rel_imp, cps25_age_in_years, cps25_lr_scale_bef_1)->ces 
+  select(contains("kiss")&-contains("DO"), 
+         cps25_genderid, cps25_education, cps25_rel_imp, ideology, age)->ces 
 
 # Now we can use just the dataset ces
 #### Recodes ####
@@ -138,3 +139,4 @@ ces <- ces %>%
     ideology_group = factor(ideology_group,
                             levels = c("Left", "Centre", "Right"))
   )
+ces$truth
