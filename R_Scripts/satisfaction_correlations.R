@@ -38,36 +38,38 @@ ces_clean <- ces25b %>%
   mutate(
     
     # LISPOP variable
-    kiss_module_lispop_2 = as.numeric(kiss_module_lispop_2),
-    kiss_module_lispop_2 = na_if(kiss_module_lispop_2, 6),
+    authenticity_numeric = as.numeric(kiss_module_lispop_2),
+    authenticity_numeric = na_if(authenticity_numeric, 6),
     
     # Feeling thermometers
-    cps25_lead_rating_23 = na_if(as.numeric(cps25_lead_rating_23), -99), # Carney
-    cps25_lead_rating_24 = na_if(as.numeric(cps25_lead_rating_24), -99), # Poilievre
-    cps25_lead_rating_25 = na_if(as.numeric(cps25_lead_rating_25), -99), # Singh
+    carney_approval = na_if(as.numeric(cps25_lead_rating_23), -99), # Carney
+    poilievre_approval = na_if(as.numeric(cps25_lead_rating_24), -99), # Poilievre
+    singh_approval = na_if(as.numeric(cps25_lead_rating_25), -99), # Singh
     
     # Trudeau government satisfaction
-    cps25_fed_gov_sat = as.numeric(cps25_fed_gov_sat),
-    cps25_fed_gov_sat = ifelse(cps25_fed_gov_sat == 5, 2.5, cps25_fed_gov_sat)
+    dissatisfaction_federal = as.numeric(cps25_fed_gov_sat),
+    dissatisfaction_federal = ifelse(cps25_fed_gov_sat == 5, 2.5, dissatisfaction_federal),
+    #ideology
+    ideology=ideology
   )
 
-
+ces25b$cps25
 # 2) Sanity checks
-summary(ces_clean$kiss_module_lispop_2)
-summary(ces_clean$cps25_lead_rating_23)
+summary(ces_clean$authenticity_numeric)
+summary(ces_clean$carney_approval)
 
-# summary(ces_clean$cps25_lead_rating_24)
-# summary(ces_clean$cps25_lead_rating_25)
-# summary(ces_clean$cps25_fed_gov_sat)
+# summary(ces_clean$poilievre_approval)
+# summary(ces_clean$singh_approval)
+# summary(ces_clean$dissatisfaction_federal)
 
 
 # 3) Correlations
 vars <- c(
-  "kiss_module_lispop_2",
-  "cps25_lead_rating_23",
-  "cps25_lead_rating_24",
-  "cps25_lead_rating_25",
-  "cps25_fed_gov_sat"
+  "authenticity_numeric",
+  "carney_approval",
+  "poilievre_approval",
+  "singh_approval",
+  "dissatisfaction_federal", "ideology"
 )
 
 cor_matrix <- cor(
@@ -76,25 +78,49 @@ cor_matrix <- cor(
 )
 
 print(cor_matrix)
+# 
+# # 4) Individual correlations with p-values
+# outcomes <- vars[-1]
+# 
+# results <- lapply(outcomes, function(v) {
+#   
+#   test <- cor.test(
+#     ces_clean$authenticity_numeric,
+#     ces_clean[[v]],
+#     use = "complete.obs"
+#   )
+#   
+#   
+#   ces25b(
+#     outcome = v,
+#     r = unname(test$estimate),
+#     p_value = test$p.value,
+#     n_complete_cases = sum(complete.cases(ces_clean$authenticity_numeric, ces_clean[[v]]))
+#   )
+# }) %>%
+#   bind_rows()
+# 
+# print(results)
+library(tidyverse)
 
-# 4) Individual correlations with p-values
-outcomes <- vars[-1]
+vars_x <- c("carney_approval", "poilievre_approval", "singh_approval", "ideology", "dissatisfaction_federal")
 
-results <- lapply(outcomes, function(v) {
-  
-  test <- cor.test(
-    ces_clean$kiss_module_lispop_2,
-    ces_clean[[v]],
-    use = "complete.obs"
+ces_long <- ces_clean %>%
+  select(authenticity_numeric, all_of(vars_x)) %>%
+  pivot_longer(
+    cols = all_of(vars_x),
+    names_to = "leader",
+    values_to = "approval"
   )
-  
-  ces25b(
-    outcome = v,
-    r = unname(test$estimate),
-    p_value = test$p.value,
-    n_complete_cases = sum(complete.cases(ces_clean$kiss_module_lispop_2, ces_clean[[v]]))
-  )
-}) %>%
-  bind_rows()
 
-print(results)
+ggplot(ces_long, aes(x = approval, y = authenticity_numeric)) +
+  geom_point(alpha = 0.6, color = "steelblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "firebrick") +
+  facet_wrap(~ leader, scales = "free_x") +
+  labs(
+    title = "Authenticity vs Leader Approval",
+    x = "Leader Approval",
+    y = "Authenticity (numeric)"
+  ) +
+  theme_minimal(base_size = 12)
+ggsave(here("Plots/scatterplots.png"), width=12, height=8,dpi=300)
