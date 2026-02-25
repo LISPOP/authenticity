@@ -1,4 +1,6 @@
 
+source("R_Scripts/1_data_import.R")
+
 # Tests whether education attenuates the relationship between age and lispop 2 question
 
 # Create Clean Analysis Dataset
@@ -34,9 +36,6 @@ summary(model2)
 exp(coef(model1))
 exp(coef(model2))
 
-
-  
-#graph
 library(ggplot2)
 
 ggplot(analysis_data,
@@ -44,6 +43,7 @@ ggplot(analysis_data,
   geom_bar(position = "fill") +
   facet_wrap(~ education_3cat) +
   theme_minimal()
+
 
 #ideology
   
@@ -183,3 +183,4 @@ ggplot(summary_data, aes(x = age_5cat, y = mean_prob, fill = gender_2cat)) +
     fill = "Gender"
   ) +
   theme_minimal()
+

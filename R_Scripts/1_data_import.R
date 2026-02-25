@@ -1,8 +1,8 @@
 
 #install devtools
-install.packages('devtools')
+#install.packages('devtools')
 #install cesdata2
-devtools::install_github("sjkiss/cesdata2")
+#devtools::install_github("sjkiss/cesdata2")
 #Check that it worked
 library(cesdata2)
 data("ces25b")
@@ -44,8 +44,32 @@ ces25b %>%
 # add any variables we deal with in here. 
 ces25b %>%
   select(contains("kiss")&-contains("DO"), 
-         cps25_genderid, cps25_education, cps25_rel_imp, ideology, age)->ces 
+         cps25_genderid, cps25_education, cps25_rel_imp, ideology, age, contains("lead_rating"), contains("fed_gov_sat"))->ces 
 
+
+ces<- ces%>%
+  mutate(
+    # LISPOP variable
+    truth_numeric = as.numeric(kiss_module_lispop_2),
+    truth_numeric = na_if(truth_numeric, 6),
+    
+    # Feeling thermometers
+    carney_approval = na_if(as.numeric(cps25_lead_rating_23), -99), # Carney
+    poilievre_approval = na_if(as.numeric(cps25_lead_rating_24), -99), # Poilievre
+    singh_approval = na_if(as.numeric(cps25_lead_rating_25), -99), # Singh
+    
+    # Trudeau government satisfaction
+    dissatisfaction_federal = as.numeric(cps25_fed_gov_sat),
+    dissatisfaction_federal = ifelse(cps25_fed_gov_sat == 5, 2.5, dissatisfaction_federal),
+    #ideology
+    ideology=ideology
+  )
+
+
+
+# summary(ces_clean$poilievre_approval)
+# summary(ces_clean$singh_approval)
+# summary(ces_clean$dissatisfaction_federal)
 # Now we can use just the dataset ces
 #### Recodes ####
 # Create recoded variables with exact coding from codebook
@@ -118,17 +142,17 @@ ces %>%
                                     "Not very important", "Not important at all",
                                     "DK/Refused")))->ces
 
-
+table(ces25b$cps25_rel_imp, useNA = "ifany")
 #Age 
 
 ces %>% 
   mutate(
     age_5cat = case_when(
-      cps25_age_in_years >= 18 & cps25_age_in_years <= 34 ~ "18-34",
-      cps25_age_in_years >= 35 & cps25_age_in_years <= 44 ~ "35-44",
-      cps25_age_in_years >= 45 & cps25_age_in_years <= 54 ~ "45-54",
-      cps25_age_in_years >= 55 & cps25_age_in_years <= 64 ~ "55-64",
-      cps25_age_in_years >= 65 ~ "65+",
+      age >= 18 & age <= 34 ~ "18-34",
+      age >= 35 & age <= 44 ~ "35-44",
+      age >= 45 & age <= 54 ~ "45-54",
+      age >= 55 & age <= 64 ~ "55-64",
+      age >= 65 ~ "65+",
       TRUE ~ NA_character_
     ),
     age_5cat = factor(age_5cat,
@@ -141,12 +165,11 @@ ces %>%
 ces <- ces %>% 
   mutate(
     ideology_group = case_when(
-      cps25_lr_scale_bef_1 %in% 0:3 ~ "Left",
-      cps25_lr_scale_bef_1 %in% 4:6 ~ "Centre",
-      cps25_lr_scale_bef_1 %in% 7:10 ~ "Right",
+      ideology %in% 0:0.3 ~ "Left",
+      ideology %in% 0.4:0.6 ~ "Centre",
+      ideology %in% 0.7:1 ~ "Right",
       TRUE ~ NA_character_
     ),
     ideology_group = factor(ideology_group,
                             levels = c("Left", "Centre", "Right"))
   )
-ces$truth
