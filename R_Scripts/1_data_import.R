@@ -1,4 +1,6 @@
-
+##### Please run these commands first!!!!!!
+# You have to reinstall cesdata2
+#remove.packages("cesdata2")
 #install devtools
 #install.packages('devtools')
 #install cesdata2
@@ -24,8 +26,7 @@ library(here)
 library(labelled)
 library(flextable)
 library(crosstable)  # Add this line
-#load the dataset called ces25b
-data("ces25b")
+
 
 # the module variables are in two batches
 # The first is a set of questions on housing and social class.
@@ -40,11 +41,12 @@ ces25b %>%
 ces25b %>% 
   select(kiss_module_Q10_1:kiss_module_lispop_5_6) %>% 
   var_label()
+
 #### Select variables ####
 # add any variables we deal with in here. 
 ces25b %>%
   select(contains("kiss")&-contains("DO"), 
-         cps25_genderid, cps25_education, degree,cps25_rel_imp, ideology, age, contains("lead_rating"), contains("fed_gov_sat"))->ces 
+         cps25_genderid, cps25_education, degree,cps25_rel_imp, ideology, age, contains("leader_rating"), contains("fed_gov_sat"), class_conflict, class_close, party_average, leader_average, speak_mind, partyid, political_efficacy)->ces 
 
 
 ces<- ces%>%
@@ -52,7 +54,8 @@ ces<- ces%>%
     # LISPOP variable
     truth_numeric = as.numeric(kiss_module_lispop_2),
     truth_numeric = na_if(truth_numeric, 6),
-    
+    ordinary_numeric = as.numeric(kiss_module_lispop_3),
+    ordinary_numeric = na_if(ordinary_numeric, 6),
     # Feeling thermometers
     carney_approval = na_if(as.numeric(cps25_lead_rating_23), -99), # Carney
     poilievre_approval = na_if(as.numeric(cps25_lead_rating_24), -99), # Poilievre
@@ -103,7 +106,20 @@ ces %>%
     ),
     Truth = factor(Truth, 
                          levels = c("Disagree", "Neutral", "Agree")))->ces
-    
+
+ces %>% 
+  mutate(
+    # Recode lispop variable
+    Ordinary = case_when(
+      kiss_module_lispop_3 %in% c(4, 5) ~ "Agree",
+      kiss_module_lispop_3 == 3 ~ "Neutral",
+      kiss_module_lispop_3 %in% c(1, 2) ~ "Disagree",
+      kiss_module_lispop_3 == 6 ~ "Neutral",
+      TRUE ~ NA_character_
+    ),
+    Ordinary = factor(Ordinary, 
+                   levels = c("Disagree", "Neutral", "Agree")))->ces
+
 # Education
 # this works great 
 ces %>% 
