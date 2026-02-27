@@ -44,7 +44,7 @@ ces25b %>%
 # add any variables we deal with in here. 
 ces25b %>%
   select(contains("kiss")&-contains("DO"), 
-         cps25_genderid, cps25_education, cps25_rel_imp, ideology, age, contains("lead_rating"), contains("fed_gov_sat"))->ces 
+         cps25_genderid, cps25_education, degree,cps25_rel_imp, ideology, age, contains("lead_rating"), contains("fed_gov_sat"))->ces 
 
 
 ces<- ces%>%
