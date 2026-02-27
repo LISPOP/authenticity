@@ -94,15 +94,15 @@ ces %>%
 ces %>% 
   mutate(
     # Recode lispop variable
-    truth = case_when(
+    Truth = case_when(
       kiss_module_lispop_2 %in% c(4, 5) ~ "Agree",
       kiss_module_lispop_2 == 3 ~ "Neutral",
       kiss_module_lispop_2 %in% c(1, 2) ~ "Disagree",
-      kiss_module_lispop_2 == 6 ~ "DK/Refused",
+      kiss_module_lispop_2 == 6 ~ "Neutral",
       TRUE ~ NA_character_
     ),
-    truth = factor(truth, 
-                         levels = c("Disagree", "Neutral", "Agree", "DK/Refused")))->ces
+    Truth = factor(Truth, 
+                         levels = c("Disagree", "Neutral", "Agree")))->ces
     
 # Education
 # this works great 
@@ -113,14 +113,14 @@ ces %>%
       cps25_education %in% 1:5 ~ "High school or less",
       cps25_education %in% 6:7 ~ "Some post-secondary",
       cps25_education %in% 8:11 ~ "University degree",
-      cps25_education == 12 ~ "DK/Refused",
+      cps25_education == 12 ~ NA_character_,
       TRUE ~ NA_character_
     ),
     education_3cat = factor(education_3cat,
                             levels = c("High school or less", 
                                        "Some post-secondary", 
-                                       "University degree",
-                                       "DK/Refused")))->ces
+                                       "University degree")))->ces
+
 
 # Religiosity
 #this works
@@ -130,17 +130,13 @@ ces %>%
     # 1 = Very important, 2 = Somewhat important, 3 = Not very important,
     # 4 = Not important at all, 5 = Don't know/Prefer not to answer
     religiosity = case_when(
-      cps25_rel_imp == 1 ~ "Very important",
-      cps25_rel_imp == 2 ~ "Somewhat important",
-      cps25_rel_imp == 3 ~ "Not very important",
-      cps25_rel_imp == 4 ~ "Not important at all",
-      cps25_rel_imp == 5 ~ "DK/Refused",
-      TRUE ~ NA_character_
+      cps25_rel_imp %in% c(1, 2) ~ "Very religious",              # 1 = Very important, 2 = Somewhat important
+      cps25_rel_imp %in% c(3, 4) ~ "Not very religious",          # 3 = Not very important, 4 = Not important at all
+      is.na(cps25_rel_imp) ~ "Atheist / no religion"  
     ),
-    religiosity = factor(religiosity,
-                         levels = c("Very important", "Somewhat important",
-                                    "Not very important", "Not important at all",
-                                    "DK/Refused")))->ces
+    religiosity = factor(
+      religiosity,
+      levels = c("Very religious", "Not very religious", "Atheist / no religion")))->ces
 
 table(ces25b$cps25_rel_imp, useNA = "ifany")
 #Age 
@@ -173,3 +169,4 @@ ces <- ces %>%
     ideology_group = factor(ideology_group,
                             levels = c("Left", "Centre", "Right"))
   )
+

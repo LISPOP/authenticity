@@ -8,25 +8,25 @@ source("R_Scripts/1_data_import.R")
   filter(
     !is.na(age_5cat),
     !is.na(education_3cat),
-    !is.na(truth),
-    truth != "DK/Refused",
+    !is.na(Truth),
+    Truth != "DK/Refused",
     education_3cat != "DK/Refused"
   ) %>%
   droplevels()
 
 # Create Binary Outcome Variable
 analysis_data <- analysis_data %>%
-  mutate(truth_binary = ifelse(truth == "Agree", 1, 0))
+  mutate(Truth_binary = ifelse(Truth == "Agree", 1, 0))
 
 # Model 1 — Effect of Age Only
-model1 <- glm(truth_binary ~ age_5cat,
+model1 <- glm(Truth_binary ~ age_5cat,
               data = analysis_data,
               family = binomial)
 
 summary(model1)
 
 # Model 2 — Age + Education
-model2 <- glm(truth_binary ~ age_5cat + education_3cat,
+model2 <- glm(Truth_binary ~ age_5cat + education_3cat,
               data = analysis_data,
               family = binomial)
 
@@ -39,7 +39,7 @@ exp(coef(model2))
 library(ggplot2)
 
 ggplot(analysis_data,
-       aes(x = age_5cat, fill = truth)) +
+       aes(x = age_5cat, fill = Truth)) +
   geom_bar(position = "fill") +
   facet_wrap(~ education_3cat) +
   theme_minimal()
@@ -53,24 +53,24 @@ ggplot(analysis_data,
   filter(
     !is.na(age_5cat),
     !is.na(ideology_group),
-    !is.na(truth),
-    truth != "DK/Refused"
+    !is.na(Truth),
+    Truth != "DK/Refused"
   ) %>%
   droplevels()
 
 
 analysis_data <- analysis_data %>%
-  mutate(truth_binary = ifelse(truth == "Agree", 1, 0))
+  mutate(Truth_binary = ifelse(Truth == "Agree", 1, 0))
 
 # Model 1 — Effect of Age Only
-model1 <- glm(truth_binary ~ age_5cat,
+model1 <- glm(Truth_binary ~ age_5cat,
               data = analysis_data,
               family = binomial)
 
 summary(model1)
 
 # Model 2 — Age + Ideology
-model2 <- glm(truth_binary ~ age_5cat + ideology_group,
+model2 <- glm(Truth_binary ~ age_5cat + ideology_group,
               data = analysis_data,
               family = binomial)
 
@@ -85,7 +85,7 @@ exp(coef(model2))
 library(ggplot2)
 
 ggplot(analysis_data,
-       aes(x = age_5cat, fill = truth)) +
+       aes(x = age_5cat, fill = Truth)) +
   geom_bar(position = "fill") +
   facet_wrap(~ ideology_group) +
   theme_minimal() +
@@ -98,7 +98,7 @@ ggplot(analysis_data,
 
 
 # model 3
-model3 <- glm(truth_binary ~ age_5cat * ideology_group,
+model3 <- glm(Truth_binary ~ age_5cat * ideology_group,
                 data = analysis_data,
                 family = binomial)
 summary(model3)
@@ -134,29 +134,31 @@ ggplot(pred, aes(x = x, y = predicted, color = group)) +
     !is.na(age_5cat),
     !is.na(ideology_group),
     !is.na(gender_2cat),
-    !is.na(truth),
-    truth != "DK/Refused"
+    !is.na(Truth),
+    Truth != "DK/Refused"
   ) %>%
-  mutate(truth_binary = ifelse(truth == "Agree", 1, 0)) %>%
+  mutate(Truth_binary = ifelse(Truth == "Agree", 1, 0)) %>%
   droplevels()
 
 
-truth_binary ~ age_5cat + ideology_group + gender_2cat
+Truth_binary ~ age_5cat + ideology_group + gender_2cat
 
-model3 <- glm(truth_binary ~ age_5cat + ideology_group + gender_2cat,
+model3 <- glm(Truth_binary ~ age_5cat + ideology_group + gender_2cat,
               data = analysis_data,
               family = binomial)
 
 summary(model3)
 exp(coef(model3))
 
-#graoh
+#graph
 
 library(ggplot2)
 library(dplyr)
 
 # Ensure gender is a factor
 analysis_data$gender_2cat <- factor(analysis_data$gender_2cat)
+# create pred_prob
+analysis_data$pred_prob <- predict(model3, type = "response")
 
 # Compute mean predicted probability by age, gender, ideology
 summary_data <- analysis_data %>%
@@ -184,3 +186,89 @@ ggplot(summary_data, aes(x = age_5cat, y = mean_prob, fill = gender_2cat)) +
   ) +
   theme_minimal()
 
+#Ideology recode
+analysis_data <- ces %>%
+  mutate(
+    ideology_num = case_when(
+      ideology == "Unsure" ~ 5,
+      TRUE ~ as.numeric(as.character(ideology))
+    ),
+    age_num = as.numeric(age),   # assuming raw age variable is `age`
+    Truth_binary = ifelse(Truth == "Agree", 1, 0)
+  ) %>%
+  filter(
+    !is.na(age_num),
+    !is.na(ideology_num),
+    !is.na(Truth_binary)
+  )
+
+#Model age and ideology
+model_age_ideo_int <- glm(
+  Truth_binary ~ age_num * ideology_num,
+  data = analysis_data,
+  family = binomial
+)
+
+summary(model_age_ideo_int)
+exp(coef(model_age_ideo_int))  # odds ratios
+
+#Mean Centre
+analysis_data <- analysis_data %>%
+  mutate(
+    age_c = scale(age_num, center = TRUE, scale = FALSE),
+    ideology_c = scale(ideology_num, center = TRUE, scale = FALSE)
+  )
+
+model_age_ideo_int <- glm(
+  Truth_binary ~ age_c * ideology_c,
+  data = analysis_data,
+  family = binomial
+)
+
+summary(model_age_ideo_int)
+exp(coef(model_age_ideo_int))
+
+#Education clean 
+analysis_data <- ces %>%
+  mutate(
+    education_clean = ifelse(education_3cat == "DK/Refused",
+                             NA,
+                             education_3cat),
+    education_clean = factor(education_clean),
+    age_num = as.numeric(age),
+    Truth_binary = ifelse(Truth == "Agree", 1, 0)
+  ) %>%
+  filter(
+    !is.na(age_num),
+    !is.na(education_clean),
+    !is.na(Truth_binary)
+  ) %>%
+  droplevels()
+#Model Age and Education
+model_age_edu_int <- glm(
+  Truth_binary ~ age_num * education_clean,
+  data = analysis_data,
+  family = binomial
+)
+
+summary(model_age_edu_int)
+exp(coef(model_age_edu_int))
+
+# plot
+
+library(ggeffects)
+
+pred_edu <- ggpredict(model_age_edu_int,
+                      terms = c("age_num [all]", "education_clean"))
+
+library(ggplot2)
+
+ggplot(pred_edu,
+       aes(x = x, y = predicted, color = group)) +
+  geom_line(size = 1.2) +
+  labs(
+    x = "Age",
+    y = "Predicted Probability of Agree",
+    color = "Education"
+  ) +
+  theme_minimal()

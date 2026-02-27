@@ -4,7 +4,7 @@ source("R_Scripts/1_data_import.R")
 # Create gender table
 ct_gender <- crosstable(
   ces,
-  by = truth,
+  by = Truth,
   cols = gender_2cat,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",
@@ -15,7 +15,7 @@ ct_gender
 # Create education table
 ct_education <- crosstable(
   ces,
-  by = truth,
+  by = Truth,
  cols = education_3cat,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",
@@ -26,7 +26,7 @@ ct_education
 # Create religiosity table
 ct_religiosity <- crosstable(
   ces,
-  by = truth,
+  by = Truth,
   cols = religiosity,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",
@@ -38,7 +38,7 @@ ct_religiosity
 # Create age table
 ct_age <- crosstable(
   ces,
-  by = truth,
+  by = Truth,
   cols = age_5cat,
   total = "both",
   percent_pattern = "{p_row}% (n={n})",
@@ -50,9 +50,13 @@ ct_age
 # Combine all four tables
 ct_all_ivs <- bind_rows(ct_gender, ct_education, ct_religiosity, ct_age)
 
-# Create flextable
-ft_all <- ct_all_ivs %>%
-  as_flextable(keep_id = TRUE) %>%
+# Select only the columns you want (exclude "label" column)
+ct_all_ivs_clean <- ct_all_ivs %>%
+  select(-label)
+
+# Create flextable without the label column
+ft_all <- ct_all_ivs_clean %>%
+  as_flextable(keep_id = FALSE) %>%
   set_header_labels(
     Variable = "Independent Variable",
     gender_2cat = "Gender",
@@ -65,7 +69,6 @@ ft_all <- ct_all_ivs %>%
   autofit()
 
 ft_all
-
 
 
 
