@@ -11,11 +11,11 @@ data("ces25b")
 
 # install packages if necessary
 # First install packages
-#install.packages("dplyr")
-#install.packages("labelled")
-#install.packages("crosstable")
-#install.packages("flextable")
-#devtools::install_github("sjkiss/cesdata2")
+install.packages("dplyr")
+install.packages("labelled")
+install.packages("crosstable")
+install.packages("flextable")
+devtools::install_github("sjkiss/cesdata2")
 
 
 # load libraries
@@ -44,14 +44,15 @@ ces25b %>%
 
 #### Select variables ####
 # add any variables we deal with in here. 
-ces25b %>%
+ces <- ces25b %>%
   select(contains("kiss")&-contains("DO"), 
-         cps25_genderid, cps25_education, degree,cps25_rel_imp, ideology, age, contains("leader_rating"), contains("fed_gov_sat"), class_conflict, class_close, party_average, leader_average, speak_mind, partyid, political_efficacy)->ces 
-
+         cps25_genderid, cps25_education, cps25_news_cons, degree, cps25_rel_imp, ideology, age, contains("lead_rating"), contains("fed_gov_sat"), class_conflict, class_close, party_average, leader_average, speak_mind, partyid, political_efficacy, class_close, kiss_module_lispop_1)
 
 ces<- ces%>%
   mutate(
     # LISPOP variable
+    climate_numeric = (kiss_module_lispop_1),
+    climate_numeric = as.numeric(climate_numeric, 6),
     truth_numeric = as.numeric(kiss_module_lispop_2),
     truth_numeric = na_if(truth_numeric, 6),
     ordinary_numeric = as.numeric(kiss_module_lispop_3),
@@ -91,6 +92,21 @@ ces %>%
     ),
     gender_2cat = factor(gender_2cat, levels = c("Male", "Female")))->ces
 
+
+
+ces %>% 
+  mutate(
+    # Recode lispop variable
+    Ordinary = case_when(
+      kiss_module_lispop_1 %in% c(4, 5) ~ "Agree",
+      kiss_module_lispop_1 == 3 ~ "Neutral",
+      kiss_module_lispop_1 %in% c(1, 2) ~ "Disagree",
+      kiss_module_lispop_1 == 6 ~ "Neutral",
+      TRUE ~ NA_character_
+    ),
+    Ordinary = factor(Ordinary, 
+                      levels = c("Disagree", "Neutral", "Agree")))->ces
+
 # This works fine , except let's pick a more meaningful variable name
 # What about truth?
 
@@ -105,7 +121,7 @@ ces %>%
       TRUE ~ NA_character_
     ),
     Truth = factor(Truth, 
-                         levels = c("Disagree", "Neutral", "Agree")))->ces
+                   levels = c("Disagree", "Neutral", "Agree")))->ces
 
 ces %>% 
   mutate(
@@ -118,7 +134,7 @@ ces %>%
       TRUE ~ NA_character_
     ),
     Ordinary = factor(Ordinary, 
-                   levels = c("Disagree", "Neutral", "Agree")))->ces
+                      levels = c("Disagree", "Neutral", "Agree")))->ces
 
 # Education
 # this works great 
@@ -185,4 +201,18 @@ ces <- ces %>%
     ideology_group = factor(ideology_group,
                             levels = c("Left", "Centre", "Right"))
   )
+
+#news consumption
+ces <- ces %>%
+  rename(news_consumption = cps25_news_cons) %>%
+  mutate(
+    news_consumption_cat = case_when(
+      news_consumption %in% 1:2 ~ "Low",
+      news_consumption %in% 3:5 ~ "Medium",
+      news_consumption %in% 6:7 ~ "High",
+      TRUE ~ NA_character_
+    ),
+    news_consumption_cat = factor(news_consumption_cat, levels = c("Low", "Medium", "High"))
+  )
+
 
