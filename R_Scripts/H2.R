@@ -48,3 +48,51 @@ ggplot(ces, aes(x = q10_composite, y = ordinary_numeric)) +
     x = "Q10 Composite (mean of Q10_1–Q10_3)",
     y = "Ordinary (ordinary_numeric)"
   )
+
+
+
+#Political Efficacy Correlations
+ces <- ces %>%
+  mutate(
+    political_efficacy = as.numeric(political_efficacy),
+    truth_numeric = as.numeric(truth_numeric),
+    ordinary_numeric = as.numeric(ordinary_numeric)
+  )
+
+#Correlations
+cor_eff_truth <- cor(
+  ces$political_efficacy,
+  ces$truth_numeric,
+  use = "pairwise.complete.obs"
+)
+
+cor_eff_ordinary <- cor(
+  ces$political_efficacy,
+  ces$ordinary_numeric,
+  use = "pairwise.complete.obs"
+)
+
+cor_eff_truth
+cor_eff_ordinary
+
+#Scatterplot 1
+ggplot(ces, aes(x = political_efficacy, y = truth_numeric)) +
+  geom_point(na.rm = TRUE) +
+  geom_smooth(method = "lm", se = FALSE, na.rm = TRUE) +
+  labs(
+    title = paste0("H2: Political Efficacy vs Truth | r = ",
+                   round(cor_eff_truth, 3)),
+    x = "Political Efficacy",
+    y = "Truth (lispop_2 numeric)"
+  )
+
+#Scatterplot 2
+ggplot(ces, aes(x = political_efficacy, y = ordinary_numeric)) +
+  geom_point(na.rm = TRUE) +
+  geom_smooth(method = "lm", se = FALSE, na.rm = TRUE) +
+  labs(
+    title = paste0("H2: Political Efficacy vs Ordinary | r = ",
+                   round(cor_eff_ordinary, 3)),
+    x = "Political Efficacy",
+    y = "Ordinary (lispop_3 numeric)"
+  )
