@@ -8,22 +8,13 @@ source("R_Scripts/1_data_import.R")
 # H13 Crosstabs: News Consumption × Truth and Ordinary
 
 # Crosstab: news_consumption_cat × Truth
-tab_truth <- table(ces$news_consumption_cat, ces$Truth, useNA = "ifany")
-tab_truth
-
-# Row percentages
-prop.table(tab_truth, margin = 1)
-
-# Chi-square test
-chisq.test(tab_truth)
-
-# Crosstab: news_consumption_cat × Ordinary
-tab_ordinary <- table(ces$news_consumption_cat, ces$Ordinary, useNA = "ifany")
-tab_ordinary
-
-# Row percentages
-prop.table(tab_ordinary, margin = 1)
-
-# Chi-square test
-chisq.test(tab_ordinary)
-
+crosstable(ces, 
+           news_consumption_cat~Truth, 
+           percent_pattern="{p_row} (n={n})") %>% 
+  as_flextable() %>% 
+  save_as_docx(., path=here("Tables/h13_1.docx"))
+crosstable(ces, 
+           news_consumption_cat~Ordinary, 
+           percent_pattern="{p_row} (n={n})") %>% 
+  as_flextable() %>% 
+  save_as_docx(., path=here("Tables/h13_2.docx"))

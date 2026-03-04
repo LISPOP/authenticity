@@ -11,11 +11,11 @@ data("ces25b")
 
 # install packages if necessary
 # First install packages
-install.packages("dplyr")
-install.packages("labelled")
-install.packages("crosstable")
-install.packages("flextable")
-devtools::install_github("sjkiss/cesdata2")
+# install.packages("dplyr")
+# install.packages("labelled")
+# install.packages("crosstable")
+# install.packages("flextable")
+# devtools::install_github("sjkiss/cesdata2")
 
 
 # load libraries
@@ -44,9 +44,13 @@ ces25b %>%
 
 #### Select variables ####
 # add any variables we deal with in here. 
+ces25b %>%
+  rowwise() %>%
+  mutate(leader_average=mean(c_across(liberal_leader:ppc_leader), na.rm=T)) %>%
+  ungroup()->ces25b
 ces <- ces25b %>%
   select(contains("kiss")&-contains("DO"), 
-         cps25_genderid, cps25_education, cps25_news_cons, degree, cps25_rel_imp, ideology, age, contains("lead_rating"), contains("fed_gov_sat"), class_conflict, class_close, party_average, leader_average, speak_mind, partyid, political_efficacy, class_close, kiss_module_lispop_1)
+         cps25_genderid, cps25_education, cps25_news_cons, degree, cps25_rel_imp, ideology, age, contains("lead_rating"), contains("fed_gov_sat"), class_conflict, class_close, party_average, leader_average, speak_mind, partyid, political_efficacy, class_close, kiss_module_lispop_1, cps25_v_likely)
 
 ces<- ces%>%
   mutate(
@@ -123,6 +127,18 @@ ces %>%
     Truth = factor(Truth, 
                    levels = c("Disagree", "Neutral", "Agree")))->ces
 
+ces %>% 
+  mutate(
+    # Recode lispop variable
+    Civility = case_when(
+      kiss_module_lispop_1 %in% c(4, 5) ~ "Agree",
+      kiss_module_lispop_1 == 3 ~ "Neutral",
+      kiss_module_lispop_1 %in% c(1, 2) ~ "Disagree",
+      kiss_module_lispop_1 == 6 ~ "Neutral",
+      TRUE ~ NA_character_
+    ),
+    Civility = factor(Civility, 
+                   levels = c("Disagree", "Neutral", "Agree")))->ces
 ces %>% 
   mutate(
     # Recode lispop variable
@@ -215,4 +231,42 @@ ces <- ces %>%
     news_consumption_cat = factor(news_consumption_cat, levels = c("Low", "Medium", "High"))
   )
 
+#### Favourable Leaders
+#Assumes: 1=Strongly disagree, 2=Somewhat disagree, 3=Neutral, 4=Somewhat agree, 5=Strongly agree, 6=DK/Refused
+ces <- ces %>%
+  mutate(
+    opinion_leaders = case_when(
+      kiss_module_lispop_4 %in% c(3,4) ~ "Unfavourable",
+      #kiss_module_lispop_4 == 3 ~ "Neutral",
+      kiss_module_lispop_4 %in% c(1, 2) ~ "Favourable",
+    #  kiss_module_lispop_4 == 5 ~ "Neutral",
+      TRUE ~ NA_character_
+    ),
+    opinion_leaders = factor(opinion_leaders, levels = c("Unfavourable", "Favourable"))
+  )
 
+# Convert speak_mind to categorical
+ces %>% 
+  mutate(speak_mind=case_when(
+    speak_mind==1~"Speak Mind",
+    TRUE~"Other"
+  ))->ces
+levels(ces$speak_mind)<-c("Speak Mind" , "Other")
+
+#####Recode voting likelihood
+#Recode: 1:2 and 6 => "Likely / certain"
+#3:4 and 7 => "Unlikely / certain not"
+#Everything else => NA
+ces <- ces %>%
+  mutate(
+    likely_vote = case_when(
+      cps25_v_likely %in% c(1, 2, 6) ~ "Likely / certain",
+      cps25_v_likely %in% c(3, 4, 7) ~ "Unlikely / certain not",
+      TRUE ~ NA_character_
+    ),
+    likely_vote = factor(likely_vote, levels = c("Likely / certain", "Unlikely / certain not"))
+  )
+
+# Conservative Party ID
+# Set theme for all graphs
+theme_set(theme_minimal(base_size=24))
